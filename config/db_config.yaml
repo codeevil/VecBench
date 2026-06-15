@@ -1,19 +1,19 @@
 pgvector:
   host: localhost
-  port: 5432
+  port: 9432
   dbname: postgres
   user: postgres
-  password: your_password
+  password: postgres
 
-milvus:
-  host: localhost
-  port: 19530
+# milvus:
+#   host: localhost
+#   port: 19530
 
-qdrant:
-  host: localhost
-  port: 6333
-  grpc_port: 6334
+# qdrant:
+#   host: localhost
+#   port: 6333
+#   grpc_port: 6334
 
-weaviate:
-  host: http://localhost:8080
-  grpc_port: 50051
+# weaviate:
+#   host: http://localhost:8080
+#   grpc_port: 50051
