@@ -51,9 +51,37 @@ def setup_database(args, config):
 def main(args):
 
     if args.case == 'data_pre':
-        adjust_dimension(f"data/{args.dataset}", vec_file="base.10M.u8bin", new_dim=1920)
-        adjust_scale(f"data/{args.dataset}", args, target_scale=100_000_000)
-        generate_incremental_data(f"data/{args.dataset}", args)
+        print("================debug1=================")
+
+        if args.dataset == 'YFCC':
+            print("================debug2=================")
+            adjust_dimension(f"data/{args.dataset}", vec_file="base.10M.u8bin", new_dim=1920)
+            adjust_scale(f"data/{args.dataset}", args, target_scale=100_000_000)
+            generate_incremental_data(f"data/{args.dataset}", args)
+        elif args.dataset == 'SIFT':
+            print("================debug3=================")
+            # 为 SIFT 生成标量文件
+            import h5py
+            import numpy as np
+            import os
+            data_dir = f"data/{args.dataset}"
+            hdf5_path = os.path.join(data_dir, "sift-128-euclidean.hdf5")
+            bin_path = os.path.join(data_dir, "sift_scalar.bin")
+            
+            if not os.path.exists(hdf5_path):
+                print(f"错误: 找不到 {hdf5_path}，请先下载 SIFT 数据集")
+            else:
+                with h5py.File(hdf5_path, 'r') as f:
+                    n_total = f['train'].shape[0]
+                # 生成随机标量（这里示例用 0-99 的随机整数）
+                scalar_data = np.random.randint(0, 100, size=(n_total,), dtype=np.uint16)
+                with open(bin_path, 'wb') as f:
+                    f.write(np.int32(n_total).tobytes())
+                    f.write(np.int32(1).tobytes())
+                    scalar_data.tofile(f)
+                print(f"已为 SIFT 生成标量文件: {bin_path} (n={n_total})")
+        else:
+            print(f"数据集 {args.dataset} 暂不支持 data_pre，请直接使用 init 和 test")
         
     elif args.case == 'init':
         db_config,index_config,schema_config = prepare_config(args)
