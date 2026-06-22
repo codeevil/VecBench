@@ -20,12 +20,13 @@ class PGVector(BaseVD):
             password=conn_params["password"],
         )
         self.cursor = self.connection.cursor()
+        self.table_name = "my_table"  # default, will be overridden by create_table()
 
     def create_table(self, db, schema):
         table_schema = schema.get(db)
-        table_name = table_schema.get("table_name")
+        self.table_name = table_schema.get("table_name")
         if not table_schema:
-            raise ValueError(f"Table {table_name} not found in schema.")
+            raise ValueError(f"Table {self.table_name} not found in schema.")
 
         fields_sql = []
         for field in table_schema.get('columns', []):
@@ -40,7 +41,7 @@ class PGVector(BaseVD):
                 fields_sql.append(f"{field_name} {field_type} {field_constraints}")
 
         create_table_sql = f"""
-            CREATE TABLE IF NOT EXISTS {table_name} (
+            CREATE TABLE IF NOT EXISTS {self.table_name} (
                 {', '.join(fields_sql)}
             );
         """
@@ -110,7 +111,7 @@ class PGVector(BaseVD):
             try:
                 start_time = time.time()
                 self.cursor.copy_expert(
-                    f"COPY my_table ({', '.join(column_names)}) FROM STDIN WITH (FORMAT CSV)",
+                    f"COPY {self.table_name} ({', '.join(column_names)}) FROM STDIN WITH (FORMAT CSV)",
                     buffer,
                 )
                 end_time = time.time()
@@ -141,7 +142,7 @@ class PGVector(BaseVD):
 
             create_index_sql = f"""
                 SET maintenance_work_mem = '4GB';
-                CREATE INDEX ON my_table USING {index_type} ({index_column} {distance}) {param_str};
+                CREATE INDEX ON {self.table_name} USING {index_type} ({index_column} {distance}) {param_str};
             """
             print(create_index_sql)
 
@@ -173,7 +174,7 @@ class PGVector(BaseVD):
             index_type = index_param["type"]
 
             index_name = f"{index_column}_{index_type.lower()}"
-            sql = f"CREATE INDEX {index_name} ON my_table USING {index_type}({index_column});"
+            sql = f"CREATE INDEX {index_name} ON {self.table_name} USING {index_type}({index_column});"
             print(sql)
 
             start_time = time.time()
@@ -239,10 +240,10 @@ class PGVector(BaseVD):
             SELECT
                 id
             FROM
-                my_table
+                {self.table_name}
             {scalar_condition_str}
             ORDER BY
-                ({vector_field} <-> (SELECT {vector_field} FROM my_table WHERE id = {reference_vector_name}))
+                ({vector_field} <-> (SELECT {vector_field} FROM {self.table_name} WHERE id = {reference_vector_name}))
             LIMIT {limit};
         """
         # print(query)
@@ -264,10 +265,10 @@ class PGVector(BaseVD):
             for row in batch_df.itertuples(index=False)
         ]
 
-        sql = """
-        INSERT INTO my_table (id, image_vec, equal)
+        sql = f"""
+        INSERT INTO {self.table_name} (id, image_vec, equal)
         VALUES %s
-        ON CONFLICT (id) DO UPDATE SET 
+        ON CONFLICT (id) DO UPDATE SET
             image_vec = EXCLUDED.image_vec,
             equal = EXCLUDED.equal;
         """
@@ -299,7 +300,7 @@ class PGVector(BaseVD):
         index_params = config[index_type]
         for index_param in index_params:
             index_column = index_param["index_column"]
-            sql = f'drop index "my_table_{index_column}_idx";'
+            sql = f'drop index "{self.table_name}_{index_column}_idx";'
             try:
                 self.sql(sql)
             except Exception as e:
@@ -318,7 +319,7 @@ class PGVector(BaseVD):
     def delete_by_ids(self, selected_ids):
         id_list = ",".join(map(str, selected_ids))
         start_time = time.time()
-        self.sql(f"DELETE FROM my_table WHERE id IN ({id_list});")
+        self.sql(f"DELETE FROM {self.table_name} WHERE id IN ({id_list});")
         return time.time() - start_time
 
     def close(self):
