@@ -1,4 +1,5 @@
 import argparse
+import os
 
 from databases.pgvector import PGVector
 from databases.milvus import Milvus
@@ -10,10 +11,78 @@ from data.load_yfcc import load_dataset_with_scalars, perform_incremental_load, 
 from utils.data_synthesizer import adjust_dimension, adjust_scale, generate_incremental_data
 from utils.query_generator import gen_queries_random
 from utils.analyzer import Analyzer
-from utils.workload_executor import (prepare_config, load_query_from_yaml, 
+from utils.workload_executor import (prepare_config, load_query_from_yaml,
                                      load_ground_truth, execute_save, execute)
 from utils.concurrent import setup_database_c, execute_concurrent, execute_concurrent_hits
 from utils.plot import save_sorted_results, plot_distribution
+
+
+def _get_data_dimension(dataset):
+    """Read vector dimension from the actual data file (not schema)."""
+    import h5py
+    data_dir = f"data/{dataset}"
+    if not os.path.isdir(data_dir):
+        return None
+    # Known non-vector HDF5 keys (ground truth / meta)
+    SKIP_KEYS = {'distances', 'neighbors', 'test', 'neighbours'}
+    for fname in sorted(os.listdir(data_dir)):
+        if fname.endswith(('.hdf5', '.h5')):
+            with h5py.File(os.path.join(data_dir, fname), 'r') as f:
+                candidates = [(k, f[k].shape) for k in f
+                              if isinstance(f[k], h5py.Dataset)
+                              and len(f[k].shape) == 2
+                              and k.lower() not in SKIP_KEYS
+                              and f[k].shape[1] > 100]  # dimension floor
+                if candidates:
+                    return max(candidates, key=lambda x: x[1][0])[1][1]
+    # Try u8bin files (YFCC)
+    for fname in sorted(os.listdir(data_dir)):
+        if fname.endswith('.u8bin'):
+            with open(os.path.join(data_dir, fname), 'rb') as f:
+                f.read(4)  # skip nvecs
+                return int.from_bytes(f.read(4), 'little')
+    return None
+
+
+def _format_scale(scale):
+    """Format scale integer to human-readable string, e.g. 1000000 -> '1M'."""
+    if scale >= 1_000_000 and scale % 1_000_000 == 0:
+        return f"{scale // 1_000_000}M"
+    elif scale >= 1_000 and scale % 1_000 == 0:
+        return f"{scale // 1_000}K"
+    return str(scale)
+
+
+def get_gt_path(dataset, scale):
+    """Generate dataset-aware ground-truth path: E2E_{scale}_{dim}.json"""
+    dim = _get_data_dimension(dataset)
+    scale_str = _format_scale(scale)
+    if dim is not None:
+        path = f"data/{dataset}/ground_truth/E2E_{scale_str}_{dim}.json"
+        if os.path.exists(path):
+            return path
+    # Fallback: search for any ground-truth JSON file
+    import glob
+    candidates = sorted(glob.glob(f"data/{dataset}/ground_truth/E2E_*.json"))
+    if candidates:
+        return candidates[0]
+    if dim is not None:
+        return path  # return the intended path so the error message is clear
+    raise ValueError(f"Cannot determine vector dimension for dataset {dataset}")
+
+
+def get_test_query_path(dataset, scale):
+    """Generate dataset-aware test query path: E2E_queries_{scale}.yaml"""
+    scale_str = _format_scale(scale)
+    path = f"config/{dataset}/E2E_queries_{scale_str}.yaml"
+    if os.path.exists(path):
+        return path
+    # Fallback: find any E2E_queries_*.yaml that exists
+    import glob
+    candidates = sorted(glob.glob(f"config/{dataset}/E2E_queries_*.yaml"))
+    if candidates:
+        return candidates[0]
+    return path  # return the intended path so the error message is clear
 
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -103,7 +172,7 @@ def main(args):
         # queries = load_query_from_yaml(args.dataset, outfile)
 
         queries = load_query_from_yaml(args.dataset, f"config/{args.dataset}/E2E_queries.yaml")
-        execute_save(queries, loader_fn ,outpath=f"data/{args.dataset}/ground_truth/E2E_1M_1920.json", save=True)
+        execute_save(queries, loader_fn, outpath=get_gt_path(args.dataset, args.scale), save=True)
 
     elif args.case == 'modify_queries':
         db_config,index_config,schema_config = prepare_config(args)
@@ -160,8 +229,8 @@ def main(args):
 
         '''Query Execution Phase'''
         # print("P2 : Query execution phase is doing.")
-        queries = load_query_from_yaml(args.dataset, f"config/{args.dataset}/E2E_queries_1M.yaml")
-        ground_truth = load_ground_truth(f'data/{args.dataset}/ground_truth/E2E_192_1M.json')
+        queries = load_query_from_yaml(args.dataset, get_test_query_path(args.dataset, args.scale))
+        ground_truth = load_ground_truth(get_gt_path(args.dataset, args.scale))
         # detailed_results, overall_results = execute(db, queries, ground_truth, index_config["search_params"], args)
         # print(overall_results)
         # # save_sorted_results(detailed_results, prefix=f"{db.db_type}")
