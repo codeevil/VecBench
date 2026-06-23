@@ -105,6 +105,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--in_ratio", help="the ratio of data to insert before creating index", type=float, default=0.2,)
     parser.add_argument("--up_ratio", help="the ratio of data to update", type=float, default=0.2,)
     parser.add_argument("--de_ratio", help="the ratio of data to delete", type=float, default=0.2,)
+    parser.add_argument("--table_name", help="Override table/collection name (default: from schema config)", default=None,)
     args = parser.parse_args()
     return args
  
@@ -161,6 +162,11 @@ def main(args):
     elif args.case == 'init':
         db_config,index_config,schema_config = prepare_config(args)
         db = setup_database(args, db_config)
+
+        # Override table_name from CLI if provided (before create_table reads schema)
+        if args.table_name:
+            schema_config[args.database]['table_name'] = args.table_name
+
         '''construct table or schema'''
         if (args.database == 'qdrant'):
             db.create_table(args.database, schema=schema_config, index = index_config)
@@ -189,10 +195,13 @@ def main(args):
 
         # '''Initialization Phase'''
         print("P1 : Initialization phase is doing.")
-        db.create_index(index_config[db.db_type], args)
-        print(f"----{db.db_type} create index successfully.")
-        if not (args.database == 'qdrant' and db.hnswp):
-            db.create_scalar_index(index_config[db.db_type], args)
+        if args.algorithm and args.algorithm != 'flat':
+            db.create_index(index_config[db.db_type], args)
+            print(f"----{db.db_type} create index successfully.")
+            if not (args.database == 'qdrant' and db.hnswp):
+                db.create_scalar_index(index_config[db.db_type], args)
+        else:
+            print(f"----{db.db_type} skipping index creation (algorithm={args.algorithm or 'flat'})")
         print("P1 : Initialization phase is finished.")
 
         print("init finished.")
@@ -245,7 +254,8 @@ def main(args):
         # Set correct table_name from schema (create_table normally does this, but test skips it)
         table_schema = schema_config.get(args.database, {})
         schema_table_name = table_schema.get("table_name", "my_table")
-        db.table_name = schema_table_name
+        db.table_name = args.table_name if args.table_name else schema_table_name
+        effective_table_name = db.table_name
 
         # '''Initialization Phase'''
         # print("P1 : Initialization phase is doing.")
@@ -267,7 +277,7 @@ def main(args):
 
         '''Concurrent Phase'''
         print("P3 : Concurrent phase is doing.")
-        db_factory = setup_database_c(args, db_config, table_name=schema_table_name)
+        db_factory = setup_database_c(args, db_config, table_name=effective_table_name)
         results = execute_concurrent(db_factory, queries, ground_truth, index_config["search_params"], args)
 
         # 对计算使用索引的比例
