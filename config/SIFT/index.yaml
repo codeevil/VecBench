@@ -3,8 +3,8 @@ pgvector:
     - index_column: "image_vec"
       distance: vector_l2_ops
       params:
-        - m: 16
-          ef_construction: 64
+        - m: 32
+          ef_construction: 300
   ivfflat:
     - index_column: "image_vec"
       distance: vector_l2_ops
@@ -14,29 +14,41 @@ pgvector:
     - index_column: "equal"
       type: btree
         
-milvus:
-  hnsw:
-    - index_column: "image_vec"
-      distance: L2
-      params:
-        - m: 16
-          ef_construction: 64
-  ivfflat:
-    - index_column: "image_vec"
-      distance: L2
-      params:
-        - nlist: 1000
-  diskann:
-    - index_column: "image_vec"
-      distance: L2
-      params: []
-  scalar_index:
-    - index_column: "equal"
+# pgvector:
+#   ivfflat:
+#     - index_column: "image_vec"
+#       distance: vector_l2_ops
+#       params:
+#         - lists: 1000
+#   scalar_index:
+#     - index_column: "equal"
+#       type: btree
+#   search_params:
+#     ivfflat: [1000]
 
-qdrant:
-  scalar_index:
-    - index_column: "equal"
-      data_type: "integer"
+# milvus:
+#   hnsw:
+#     - index_column: "image_vec"
+#       distance: L2
+#       params:
+#         - m: 16
+#           ef_construction: 64
+#   ivfflat:
+#     - index_column: "image_vec"
+#       distance: L2
+#       params:
+#         - nlist: 1000
+#   diskann:
+#     - index_column: "image_vec"
+#       distance: L2
+#       params: []
+#   scalar_index:
+#     - index_column: "equal"
+
+# qdrant:
+#   scalar_index:
+#     - index_column: "equal"
+#       data_type: "integer"
 
 weaviate:
   hnsw:

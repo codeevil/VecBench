@@ -1,8 +1,42 @@
 # VecBench
+## quike start
+```
+# 1. 清理旧数据（drop 表）
+psql -h localhost -p 9432 -U postgres -d postgres -c "DROP TABLE IF EXISTS my_table_ivf; DROP TABLE IF EXISTS my_table;"
+psql -h localhost -p 9432 -U postgres -d postgres -c "DROP TABLE IF EXISTS my_table_ivf;"
+
+python benchmark.py --case data_pre --dataset SIFT
+
+# 2. 清理旧的查询和 GT 文件，确保 init 生成全新的
+rm -f config/SIFT/E2E_queries_1M.yaml data/SIFT/ground_truth/E2E_1M_128.json
+
+# 3. init: 建表 → 插入数据 → 从实际数据自动生成查询和 GT
+python benchmark.py --case init --database pgvector --dataset SIFT --algorithm ivfflat --scale 1000000
+
+# 4. test: 全表精确搜索验证 recall=1.0
+python benchmark.py --case test --database pgvector --dataset SIFT --algorithm ivfflat --concurrency 10
+
+# HNSW
+
+psql -h localhost -p 9432 -U postgres -d postgres -c "DROP TABLE IF EXISTS my_table;"
+
+rm -f config/SIFT/E2E_queries_1M.yaml data/SIFT/ground_truth/E2E_1M_128.json
+
+python benchmark.py --case init --database pgvector --dataset SIFT --algorithm hnsw --scale 1000000
+
+python benchmark.py --case test --database pgvector --dataset SIFT --algorithm hnsw --concurrency 10
+
+PGPASSWORD=postgres psql -h localhost -p 9432 -U postgres -d postgres -c "\d my_table"
+
+PGPASSWORD=postgres psql -h localhost -p 9432 -U postgres -d postgres -c "EXPLAIN SELECT id FROM my_table ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 1)), id LIMIT 10;"
+
+```
+
 
 A controllable benchmark framework for evaluating vector databases under filtered vector search workloads. VecBench supports multiple databases, datasets, index algorithms, and provides comprehensive metrics including recall, latency, QPS, and incremental operation performance. **We also maintain an online leaderboard with benchmark results at http://www.x-bench.xin**
 
 ## Overview
+
 
 Filtered vector search—retrieving nearest neighbors under structured constraints (e.g., equality, range, containment)—is a core operation in modern vector databases and LLM systems (e.g., RAG).
 
