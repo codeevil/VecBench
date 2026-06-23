@@ -192,7 +192,7 @@ class PGVector(BaseVD):
         self.connection.commit()
         print(results)
 
-    def query(self, query_config, param=None):
+    def query(self, query_config, param=None, algorithm="hnsw"):
         vector_field = query_config["vector_field"]
         reference_vector_name = query_config["reference_vector_name"]
         scalar_filters = query_config["scalar_filters"]
@@ -235,8 +235,12 @@ class PGVector(BaseVD):
         # SET hnsw.ef_search = {param};
         # SET ivfflat.iterative_scan = relaxed_order;
         # SET hnsw.iterative_scan = strict_order;
+        if algorithm == "ivfflat":
+            set_param_sql = f"SET ivfflat.probes = {param};SET ivfflat.iterative_scan = relaxed_order;"
+        else:
+            set_param_sql = f"SET hnsw.ef_search = {param}; SET hnsw.iterative_scan = strict_order;"
         query = f"""
-            SET hnsw.ef_search = {param};
+            {set_param_sql}
             SELECT
                 id
             FROM

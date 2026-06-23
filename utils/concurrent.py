@@ -9,9 +9,10 @@ from queue import Queue, Empty
 class DBConnectionFactory:
     """Thread-safe connection factory with connection pooling."""
 
-    def __init__(self, config, db_type, max_connections=32):
+    def __init__(self, config, db_type, table_name="my_table", max_connections=32):
         self.config = config
         self.db_type = db_type
+        self.table_name = table_name
         self.max_connections = max_connections
         self.connection_pool = Queue(maxsize=max_connections)
         self.lock = threading.Lock()
@@ -42,6 +43,7 @@ class DBConnectionFactory:
                 if self.active_connections < self.max_connections:
                     db = self.create_connection()
                     db.connect()
+                    db.table_name = self.table_name
                     self.active_connections += 1
                     self.created_connections += 1
                     return db
@@ -60,23 +62,24 @@ class DBConnectionFactory:
         self.active_connections = 0
 
 
-def setup_database_c(args, config):
+def setup_database_c(args, config, table_name="my_table"):
     factory = DBConnectionFactory(
-        config, args.database, max_connections=args.concurrency * 2
+        config, args.database, table_name=table_name, max_connections=args.concurrency * 2
     )
     for _ in range(min(4, factory.max_connections)):
         conn = factory.create_connection()
         conn.connect()
+        conn.table_name = table_name
         factory.release_connection(conn)
     print(f"------{args.database} connection factory initialized (max: {factory.max_connections})")
     return factory
 
 
-def execute_single_query(db_factory, query, param, gt):
+def execute_single_query(db_factory, query, param, gt, algorithm="hnsw"):
     db = db_factory.get_connection()
     try:
         start_time = time.time()
-        result, _ = db.query(query, param)
+        result, _ = db.query(query, param, algorithm=algorithm)
         exec_time = time.time() - start_time
         recall = db.cal_recall(result, gt["result"])
         return result, exec_time, recall
@@ -103,7 +106,7 @@ def execute_concurrent_hits(db, queries, ground_truth, search_params, args, db_c
                     continue
 
                 for _ in range(args.times):
-                    future = executor.submit(execute_single_query, db_factory, query, param, gt)
+                    future = executor.submit(execute_single_query, db_factory, query, param, gt, args.algorithm)
                     future_to_query[future] = query["name"]
 
             # with tqdm(total=len(future_to_query), desc="Running queries") as pbar:
@@ -176,7 +179,7 @@ def execute_concurrent_hits(db, queries, ground_truth, search_params, args, db_c
                     continue
 
                 for _ in range(args.times):
-                    future = executor.submit(execute_single_query, db_factory, query, param, gt)
+                    future = executor.submit(execute_single_query, db_factory, query, param, gt, args.algorithm)
                     future_to_query[future] = query["name"]
 
             # with tqdm(total=len(future_to_query), desc="Running queries") as pbar:
@@ -250,7 +253,7 @@ def execute_concurrent(db_factory, queries, ground_truth, search_params, args):
         for q in warmup_queries:
             gt = next((g for g in ground_truth if g["name"] == q["name"]), None)
             if gt:
-                futures.append(executor.submit(execute_single_query, db_factory, q, warmup_param, gt))
+                futures.append(executor.submit(execute_single_query, db_factory, q, warmup_param, gt, args.algorithm))
         
         for future in concurrent.futures.as_completed(futures):
             try:
@@ -282,7 +285,7 @@ def execute_concurrent(db_factory, queries, ground_truth, search_params, args):
                     continue
 
                 for _ in range(args.times):
-                    future = executor.submit(execute_single_query, db_factory, query, param, gt)
+                    future = executor.submit(execute_single_query, db_factory, query, param, gt, args.algorithm)
                     future_to_query[future] = query["name"]
 
             for future in tqdm(concurrent.futures.as_completed(future_to_query), 

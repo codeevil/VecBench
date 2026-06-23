@@ -170,7 +170,7 @@ def execute_save(queries, data, outpath, save=False):
             filtered_data['distance'] = filtered_data[vector_field].apply(
                 lambda vec: np.linalg.norm(vec - reference_vector)
             )
-            sorted_data = filtered_data.sort_values(by='distance')
+            sorted_data = filtered_data.sort_values(by=['distance', 'id'])
             result = sorted_data.head(limit)['id'].tolist()
 
             results.append({'name': query['name'], 'result': result})
@@ -202,20 +202,22 @@ def execute_save(queries, data, outpath, save=False):
                 heap = heaps[q['name']]
 
                 filtered_data = apply_scalar_filters(df_chunk, scalar_filters).copy()
-                for _, row in filtered_data.iterrows(): 
+                for _, row in filtered_data.iterrows():
                     vec = np.array(row[vector_field], dtype=np.float32)
                     ref_vec = np.array(ref_vec, dtype=np.float32)
                     dist = np.linalg.norm(vec - ref_vec)
+                    item = (-dist, -row['id'])  # (-dist, -id): heapq 作为 max-heap，
+                    # 距离相同时 -id 更小（即 id 更大）的元素在堆顶，优先被淘汰
                     if len(heap) < limit:
-                        heapq.heappush(heap, (-dist, row['id']))
-                    else:
-                        if -heap[0][0] > dist:
-                            heapq.heappop(heap)
-                            heapq.heappush(heap, (-dist, row['id']))
+                        heapq.heappush(heap, item)
+                    elif item > heap[0]:
+                        heapq.heappop(heap)
+                        heapq.heappush(heap, item)
         for q in queries:
             heap = heaps[q['name']]
-            topk = sorted([(-d, idx) for d, idx in heap])
-            result_ids = [idx for _, idx in topk]
+            # 按 (distance ASC, id ASC) 排序输出
+            topk = sorted(heap, key=lambda x: (-x[0], -x[1]))
+            result_ids = [-idx for _, idx in topk]
             results.append({'name': q['name'], 'result': result_ids})
 
     if save:

@@ -4,7 +4,7 @@ import os
 from databases.pgvector import PGVector
 from databases.milvus import Milvus
 from databases.qdrant import Qdrant
-from databases.weaviate import Weaviate
+# from databases.weaviate import Weaviate  # placeholder pkg broken on Python 3.13
 
 from data.load_yfcc import load_dataset_with_scalars, perform_incremental_load, perform_update, perform_delete
 
@@ -53,6 +53,12 @@ def _format_scale(scale):
     return str(scale)
 
 
+def get_query_path(dataset, scale):
+    """Generate dataset-aware query YAML path: E2E_queries_{scale}.yaml (for saving)."""
+    scale_str = _format_scale(scale)
+    return f"config/{dataset}/E2E_queries_{scale_str}.yaml"
+
+
 def get_gt_path(dataset, scale):
     """Generate dataset-aware ground-truth path: E2E_{scale}_{dim}.json"""
     dim = _get_data_dimension(dataset)
@@ -72,7 +78,7 @@ def get_gt_path(dataset, scale):
 
 
 def get_test_query_path(dataset, scale):
-    """Generate dataset-aware test query path: E2E_queries_{scale}.yaml"""
+    """Generate dataset-aware test query path: E2E_queries_{scale}.yaml (for loading)."""
     scale_str = _format_scale(scale)
     path = f"config/{dataset}/E2E_queries_{scale_str}.yaml"
     if os.path.exists(path):
@@ -110,7 +116,7 @@ def setup_database(args, config):
     elif args.database == 'qdrant':
         db = Qdrant(config, args.database)
     elif args.database == 'weaviate':
-        db = Weaviate(config, args.database)
+        raise NotImplementedError('Weaviate placeholder package broken on Python 3.13')
     else:
         raise ValueError("Only support 'pgvector'、'milvus'、'qdrant'、'weaviate' now.")
     db.connect()
@@ -132,7 +138,6 @@ def main(args):
             # 为 SIFT 生成标量文件
             import h5py
             import numpy as np
-            import os
             data_dir = f"data/{args.dataset}"
             hdf5_path = os.path.join(data_dir, "sift-128-euclidean.hdf5")
             bin_path = os.path.join(data_dir, "sift_scalar.bin")
@@ -142,8 +147,9 @@ def main(args):
             else:
                 with h5py.File(hdf5_path, 'r') as f:
                     n_total = f['train'].shape[0]
-                # 生成随机标量（这里示例用 0-99 的随机整数）
-                scalar_data = np.random.randint(0, 100, size=(n_total,), dtype=np.uint16)
+                # 使用固定种子生成可复现的标量值 (0-99)
+                rng = np.random.default_rng(42)
+                scalar_data = rng.integers(0, 100, size=(n_total,), dtype=np.uint16)
                 with open(bin_path, 'wb') as f:
                     f.write(np.int32(n_total).tobytes())
                     f.write(np.int32(1).tobytes())
@@ -154,7 +160,7 @@ def main(args):
         
     elif args.case == 'init':
         db_config,index_config,schema_config = prepare_config(args)
-        db = setup_database(args, db_config)    
+        db = setup_database(args, db_config)
         '''construct table or schema'''
         if (args.database == 'qdrant'):
             db.create_table(args.database, schema=schema_config, index = index_config)
@@ -167,12 +173,29 @@ def main(args):
             df_chunk = db.process_data(df_chunk, args.database, schema_config)
             db.insert_data(df_chunk, args.database, schema_config)
 
-        # print(f"Generating query ...")
-        # outfile = gen_queries_random(loader_fn, args, 100, f"config/{args.dataset}/E2E_queries.yaml")
-        # queries = load_query_from_yaml(args.dataset, outfile)
+        # Auto-generate queries from the actual data so scalar values,
+        # queries, and ground truth are always consistent.
+        query_path = get_query_path(args.dataset, args.scale)
+        print(f"Generating queries from actual data → {query_path} ...")
+        outfile = gen_queries_random(loader_fn, args, n_queries=100, outfile=query_path)
+        queries = load_query_from_yaml(args.dataset, outfile)
 
-        queries = load_query_from_yaml(args.dataset, f"config/{args.dataset}/E2E_queries.yaml")
-        execute_save(queries, loader_fn, outpath=get_gt_path(args.dataset, args.scale), save=True)
+        dim = _get_data_dimension(args.dataset)
+        scale_str = _format_scale(args.scale)
+        gt_path = f"data/{args.dataset}/ground_truth/E2E_{scale_str}_{dim}.json"
+        os.makedirs(os.path.dirname(gt_path), exist_ok=True)
+        print(f"Computing ground truth → {gt_path} ...")
+        execute_save(queries, loader_fn, outpath=gt_path, save=True)
+
+        # '''Initialization Phase'''
+        print("P1 : Initialization phase is doing.")
+        db.create_index(index_config[db.db_type], args)
+        print(f"----{db.db_type} create index successfully.")
+        if not (args.database == 'qdrant' and db.hnswp):
+            db.create_scalar_index(index_config[db.db_type], args)
+        print("P1 : Initialization phase is finished.")
+
+        print("init finished.")
 
     elif args.case == 'modify_queries':
         db_config,index_config,schema_config = prepare_config(args)
@@ -219,6 +242,11 @@ def main(args):
         db_config,index_config,schema_config = prepare_config(args)
         db = setup_database(args, db_config)
 
+        # Set correct table_name from schema (create_table normally does this, but test skips it)
+        table_schema = schema_config.get(args.database, {})
+        schema_table_name = table_schema.get("table_name", "my_table")
+        db.table_name = schema_table_name
+
         # '''Initialization Phase'''
         # print("P1 : Initialization phase is doing.")
         # db.create_index(index_config[db.db_type], args)
@@ -228,7 +256,7 @@ def main(args):
         # print("P1 : Initialization phase is finished.")
 
         '''Query Execution Phase'''
-        # print("P2 : Query execution phase is doing.")
+        print("P2 : Query execution phase is doing.")
         queries = load_query_from_yaml(args.dataset, get_test_query_path(args.dataset, args.scale))
         ground_truth = load_ground_truth(get_gt_path(args.dataset, args.scale))
         # detailed_results, overall_results = execute(db, queries, ground_truth, index_config["search_params"], args)
@@ -239,7 +267,7 @@ def main(args):
 
         '''Concurrent Phase'''
         print("P3 : Concurrent phase is doing.")
-        db_factory = setup_database_c(args, db_config)
+        db_factory = setup_database_c(args, db_config, table_name=schema_table_name)
         results = execute_concurrent(db_factory, queries, ground_truth, index_config["search_params"], args)
 
         # 对计算使用索引的比例
