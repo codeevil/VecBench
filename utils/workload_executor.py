@@ -26,9 +26,13 @@ def load_ground_truth(ground_truth_file):
         return json.load(f)
     
 def execute(db, queries, ground_truth, search_params,  args):
-    detailed_results = [] 
+    detailed_results = []
     overall_results = []
-    params = search_params[args.algorithm]
+    algorithm = args.algorithm if args.algorithm else 'flat'
+    if algorithm == 'flat':
+        params = [None]
+    else:
+        params = search_params[algorithm]
 
     for param in params:
         total_latency = []
@@ -45,7 +49,7 @@ def execute(db, queries, ground_truth, search_params,  args):
             query_results = []
 
             for i in range(args.times):
-                result, time = db.query(query, param)
+                result, time = db.query(query, param, algorithm=algorithm)
                 recall = db.cal_recall(result, gt['result'])
 
                 execution_times.append(time)

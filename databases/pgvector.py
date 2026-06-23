@@ -235,12 +235,14 @@ class PGVector(BaseVD):
         # SET hnsw.ef_search = {param};
         # SET ivfflat.iterative_scan = relaxed_order;
         # SET hnsw.iterative_scan = strict_order;
-        if algorithm == "ivfflat":
-            set_param_sql = f"SET ivfflat.probes = {param};SET ivfflat.iterative_scan = relaxed_order;"
+        if algorithm == "flat":
+            set_param_sql = "SET ivfflat.probes = 32768;"  # max probes to force full scan
+        elif algorithm == "ivfflat":
+            # set_param_sql = f"SET ivfflat.probes = {param};SET ivfflat.iterative_scan = relaxed_order;"
+            set_param_sql = f"SET ivfflat.probes = {param};"
         else:
             set_param_sql = f"SET hnsw.ef_search = {param}; SET hnsw.iterative_scan = strict_order;"
-        query = f"""
-            {set_param_sql}
+        select_sql = f"""
             SELECT
                 id
             FROM
@@ -250,16 +252,18 @@ class PGVector(BaseVD):
                 ({vector_field} <-> (SELECT {vector_field} FROM {self.table_name} WHERE id = {reference_vector_name}))
             LIMIT {limit};
         """
-        # print(query)
         result, execution_time = None, None
         start_time = time.time()
         try:
-            self.cursor.execute(query)
+            if set_param_sql:
+                self.cursor.execute(set_param_sql)
+            self.cursor.execute(select_sql)
             result = self.cursor.fetchall()
             end_time = time.time()
             execution_time = end_time - start_time
         except Exception as e:
             print(f"Error executing query: {e}")
+            self.connection.rollback()
 
         return result, execution_time
 

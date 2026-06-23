@@ -88,7 +88,11 @@ def execute_single_query(db_factory, query, param, gt, algorithm="hnsw"):
 
 def execute_concurrent_hits(db, queries, ground_truth, search_params, args, db_config):
     results = []
-    params = search_params[args.algorithm]
+    algorithm = args.algorithm if args.algorithm else 'flat'
+    if algorithm == 'flat':
+        params = [None]
+    else:
+        params = search_params[algorithm]
 
     for param in params:
         exec_times, recalls, names = [], [], []
@@ -106,7 +110,7 @@ def execute_concurrent_hits(db, queries, ground_truth, search_params, args, db_c
                     continue
 
                 for _ in range(args.times):
-                    future = executor.submit(execute_single_query, db_factory, query, param, gt, args.algorithm)
+                    future = executor.submit(execute_single_query, db_factory, query, param, gt, algorithm)
                     future_to_query[future] = query["name"]
 
             # with tqdm(total=len(future_to_query), desc="Running queries") as pbar:
@@ -179,7 +183,7 @@ def execute_concurrent_hits(db, queries, ground_truth, search_params, args, db_c
                     continue
 
                 for _ in range(args.times):
-                    future = executor.submit(execute_single_query, db_factory, query, param, gt, args.algorithm)
+                    future = executor.submit(execute_single_query, db_factory, query, param, gt, algorithm)
                     future_to_query[future] = query["name"]
 
             # with tqdm(total=len(future_to_query), desc="Running queries") as pbar:
@@ -236,14 +240,18 @@ def execute_concurrent_hits(db, queries, ground_truth, search_params, args, db_c
 
 def execute_concurrent(db_factory, queries, ground_truth, search_params, args):
     results = []
-    params = search_params[args.algorithm]
+    algorithm = args.algorithm if args.algorithm else 'flat'
+    if algorithm == 'flat':
+        params = [None]  # single pass with no index hints
+    else:
+        params = search_params[algorithm]
 
     # ========================================================
     # 阶段 1: Warm-up (预热阶段)
     # 目的：将数据库数据加载到 OS Cache 和 DB Buffer Pool，消除冷启动 IO 干扰
     # ========================================================
     print("\n>>> [1/2] Starting Warm-up Phase...")
-    
+
     warmup_size = max(1, len(queries) // 10)
     warmup_queries = queries[:warmup_size]
     warmup_param = params[0] 
@@ -285,7 +293,7 @@ def execute_concurrent(db_factory, queries, ground_truth, search_params, args):
                     continue
 
                 for _ in range(args.times):
-                    future = executor.submit(execute_single_query, db_factory, query, param, gt, args.algorithm)
+                    future = executor.submit(execute_single_query, db_factory, query, param, gt, algorithm)
                     future_to_query[future] = query["name"]
 
             for future in tqdm(concurrent.futures.as_completed(future_to_query), 
