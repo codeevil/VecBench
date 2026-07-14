@@ -241,7 +241,8 @@ class PGVector(BaseVD):
             # set_param_sql = f"SET ivfflat.probes = {param};SET ivfflat.iterative_scan = relaxed_order;"
             set_param_sql = f"SET ivfflat.probes = {param};"
         else:
-            set_param_sql = f"SET hnsw.ef_search = {param}; SET hnsw.iterative_scan = strict_order;"
+            set_param_sql = f"SET hnsw.ef_search = {param}; "
+            set_param_sql = set_param_sql + "SET hnsw.iterative_scan = strict_order;"
         select_sql = f"""
             SELECT
                 id

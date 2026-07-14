@@ -14,21 +14,25 @@ rm -f config/SIFT/E2E_queries_1M.yaml data/SIFT/ground_truth/E2E_1M_128.json
 python benchmark.py --case init --database pgvector --dataset SIFT --algorithm ivfflat --scale 1000000
 
 # 4. test: 全表精确搜索验证 recall=1.0
-python benchmark.py --case test --database pgvector --dataset SIFT --algorithm ivfflat --concurrency 10
+python benchmark.py --case test --database pgvector --dataset SIFT --table_name my_table_ivf --algorithm flat --concurrency 10
 
 # HNSW
-
 psql -h localhost -p 9432 -U postgres -d postgres -c "DROP TABLE IF EXISTS my_table;"
 
 rm -f config/SIFT/E2E_queries_1M.yaml data/SIFT/ground_truth/E2E_1M_128.json
 
 python benchmark.py --case init --database pgvector --dataset SIFT --algorithm hnsw --scale 1000000
 
-python benchmark.py --case test --database pgvector --dataset SIFT --algorithm hnsw --concurrency 10
+python benchmark.py --case test --database pgvector --dataset SIFT --table_name my_table_ivf --algorithm flat --concurrency 10
+
+python benchmark.py --case test --database pgvector --dataset SIFT --table_name my_table --algorithm hnsw --concurrency 10
 
 PGPASSWORD=postgres psql -h localhost -p 9432 -U postgres -d postgres -c "\d my_table"
 
-PGPASSWORD=postgres psql -h localhost -p 9432 -U postgres -d postgres -c "EXPLAIN SELECT id FROM my_table ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 1)), id LIMIT 10;"
+PGPASSWORD=postgres psql -h localhost -p 9432 -U postgres -d postgres -c "SELECT count(*) FROM my_table_ivf;"
+
+PGPASSWORD=postgres psql -h localhost -p 9432 -U postgres -d postgres -c "EXPLAIN SELECT id FROM my_table_ivf ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 1)), id LIMIT 10;"
+
 
 ```
 

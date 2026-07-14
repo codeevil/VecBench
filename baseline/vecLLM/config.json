@@ -1,0 +1,25 @@
+{
+    "pg":  {
+               "host":  "localhost",
+               "port":  9432,
+               "database":  "postgres",
+               "user":  "postgres",
+               "password":  "postgres"
+           },
+    "optimizer":  {
+                      "target_mode":  "performance_first",
+                      "candidate_count":  3,
+                      "min_acceptable_recall":  0.7,
+                      "high_recall_target":  0.95,
+                      "max_latency_ms":  200,
+                      "index_budget":  "allow_new_indexes",
+                      "default_schema":  "public",
+                      "model":  "Qwen3-235B-A22B"
+                  },
+    "benchmark":  {
+                      "warmup_runs":  0,
+                      "runs":  10,
+                      "times":  1,
+                      "concurrency":  50
+                  }
+}

@@ -1,0 +1,256 @@
+[
+  {
+    "query_name": "query1",
+    "sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+    "candidates": [
+      {
+        "candidate_id": "candidate_1",
+        "target_mode": "balanced",
+        "chosen_path": "HNSW iterative scan with ef_search=100, strict_order",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 0.95,
+        "expected_qps_class": "high",
+        "required_indexes": [
+          "my_table_image_vec_idx"
+        ],
+        "session_settings": [
+          "SET LOCAL hnsw.ef_search = 100;",
+          "SET LOCAL hnsw.iterative_scan = strict_order;",
+          "SET LOCAL enable_seqscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "why_safe": "Uses HNSW index with iterative scan; ef_search=100 ensures high recall; strict_order guarantees correct ranking.",
+        "why_faster_than_default": "Default ef_search=40 may yield lower recall; increasing to 100 and using iterative scan speeds up filtered search.",
+        "fallback_plan": "Exact pre-filter sequential scan",
+        "assumptions": "Filtered rows ~10K, HNSW index with m=32, ef_construction=300 is well-tuned.",
+        "missing_stats": "None"
+      },
+      {
+        "candidate_id": "candidate_2",
+        "target_mode": "balanced",
+        "chosen_path": "HNSW iterative scan with ef_search=200, strict_order",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 0.97,
+        "expected_qps_class": "high",
+        "required_indexes": [
+          "my_table_image_vec_idx"
+        ],
+        "session_settings": [
+          "SET LOCAL hnsw.ef_search = 200;",
+          "SET LOCAL hnsw.iterative_scan = strict_order;",
+          "SET LOCAL enable_seqscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "why_safe": "Larger ef_search increases recall; iterative scan ensures accuracy.",
+        "why_faster_than_default": "Higher ef_search yields better recall without excessive slowdown.",
+        "fallback_plan": "Exact pre-filter sequential scan",
+        "assumptions": "Filtered rows ~10K, index is efficient.",
+        "missing_stats": "None"
+      },
+      {
+        "candidate_id": "candidate_3",
+        "target_mode": "balanced",
+        "chosen_path": "HNSW iterative scan with ef_search=300, strict_order",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 0.98,
+        "expected_qps_class": "medium",
+        "required_indexes": [
+          "my_table_image_vec_idx"
+        ],
+        "session_settings": [
+          "SET LOCAL hnsw.ef_search = 300;",
+          "SET LOCAL hnsw.iterative_scan = strict_order;",
+          "SET LOCAL enable_seqscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "why_safe": "Very high recall; strict order guarantees correctness.",
+        "why_faster_than_default": "Higher ef_search improves recall further.",
+        "fallback_plan": "Exact pre-filter",
+        "assumptions": "Filtered rows ~10K, index handles ef_search=300 well.",
+        "missing_stats": "None"
+      },
+      {
+        "candidate_id": "candidate_4",
+        "target_mode": "balanced",
+        "chosen_path": "HNSW iterative scan with ef_search=400, strict_order",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 0.99,
+        "expected_qps_class": "medium",
+        "required_indexes": [
+          "my_table_image_vec_idx"
+        ],
+        "session_settings": [
+          "SET LOCAL hnsw.ef_search = 400;",
+          "SET LOCAL hnsw.iterative_scan = strict_order;",
+          "SET LOCAL enable_seqscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "why_safe": "Near-perfect recall; strict ordering.",
+        "why_faster_than_default": "Very high ef_search maximizes recall but may be slower.",
+        "fallback_plan": "Exact pre-filter",
+        "assumptions": "Filtered rows ~10K, index supports large ef_search.",
+        "missing_stats": "None"
+      },
+      {
+        "candidate_id": "candidate_5",
+        "target_mode": "balanced",
+        "chosen_path": "HNSW iterative scan with ef_search=100, relaxed_order + re-rank in CTE",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 0.93,
+        "expected_qps_class": "high",
+        "required_indexes": [
+          "my_table_image_vec_idx"
+        ],
+        "session_settings": [
+          "SET LOCAL hnsw.ef_search = 100;",
+          "SET LOCAL hnsw.iterative_scan = relaxed_order;",
+          "SET LOCAL enable_seqscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "WITH ann_results AS MATERIALIZED (SELECT id, image_vec FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100) SELECT ann_results.id FROM ann_results ORDER BY (ann_results.image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232))",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) WITH ann_results AS MATERIALIZED (SELECT id, image_vec FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100) SELECT ann_results.id FROM ann_results ORDER BY (ann_results.image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232))",
+        "why_safe": "Relaxed order speeds up initial scan; re-rank in CTE ensures final order correct.",
+        "why_faster_than_default": "Relaxed order reduces overhead; re-rank only over 100 rows.",
+        "fallback_plan": "Exact pre-filter",
+        "assumptions": "Filtered rows ~10K; re-rank in CTE is fast.",
+        "missing_stats": "None"
+      },
+      {
+        "candidate_id": "candidate_6",
+        "target_mode": "balanced",
+        "chosen_path": "Exact pre-filter: disable index scan, use sequential scan",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 1.0,
+        "expected_qps_class": "low",
+        "required_indexes": [],
+        "session_settings": [
+          "SET LOCAL enable_indexscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "why_safe": "No approximation; sequential scan over filtered rows gives exact result.",
+        "why_faster_than_default": "For small filtered rows (~10K), sequential scan may be comparable to index scan without overhead.",
+        "fallback_plan": "None",
+        "assumptions": "Filtered rows ~10K, sequential scan is tolerable.",
+        "missing_stats": "None"
+      },
+      {
+        "candidate_id": "candidate_7",
+        "target_mode": "balanced",
+        "chosen_path": "HNSW iterative scan with ef_search=80, strict_order",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 0.92,
+        "expected_qps_class": "high",
+        "required_indexes": [
+          "my_table_image_vec_idx"
+        ],
+        "session_settings": [
+          "SET LOCAL hnsw.ef_search = 80;",
+          "SET LOCAL hnsw.iterative_scan = strict_order;",
+          "SET LOCAL enable_seqscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "why_safe": "Moderate ef_search still yields good recall; strict order ensures correct ranking.",
+        "why_faster_than_default": "ef_search=80 is lower than 100 but likely faster; still above 0.7 recall.",
+        "fallback_plan": "Increase ef_search or exact pre-filter",
+        "assumptions": "Filtered rows ~10K, recall acceptable.",
+        "missing_stats": "None"
+      },
+      {
+        "candidate_id": "candidate_8",
+        "target_mode": "balanced",
+        "chosen_path": "HNSW iterative scan with ef_search=100, relaxed_order",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 0.96,
+        "expected_qps_class": "high",
+        "required_indexes": [
+          "my_table_image_vec_idx"
+        ],
+        "session_settings": [
+          "SET LOCAL hnsw.ef_search = 100;",
+          "SET LOCAL hnsw.iterative_scan = relaxed_order;",
+          "SET LOCAL enable_seqscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "why_safe": "relaxed_order mode reduces ordering overhead while still using index scan.",
+        "why_faster_than_default": "More efficient than strict_order for filtered search.",
+        "fallback_plan": "Switch to strict_order",
+        "assumptions": "Filtered rows ~10K, mode works well.",
+        "missing_stats": "None"
+      },
+      {
+        "candidate_id": "candidate_9",
+        "target_mode": "balanced",
+        "chosen_path": "HNSW iterative scan with ef_search=100, strict_order, limited scan tuples",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 0.93,
+        "expected_qps_class": "high",
+        "required_indexes": [
+          "my_table_image_vec_idx"
+        ],
+        "session_settings": [
+          "SET LOCAL hnsw.ef_search = 100;",
+          "SET LOCAL hnsw.iterative_scan = strict_order;",
+          "SET LOCAL hnsw.max_scan_tuples = 5000;",
+          "SET LOCAL enable_seqscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "why_safe": "Limiting scan tuples reduces work while maintaining high recall.",
+        "why_faster_than_default": "Lower max_scan_tuples speeds up, but recall may drop slightly.",
+        "fallback_plan": "Increase max_scan_tuples or remove limit",
+        "assumptions": "Recall still above 0.7 with 5000 max scan tuples.",
+        "missing_stats": "None"
+      },
+      {
+        "candidate_id": "candidate_10",
+        "target_mode": "balanced",
+        "chosen_path": "HNSW iterative scan with ef_search=100, strict_order, high scan mem multiplier",
+        "estimated_selectivity": 0.010301,
+        "estimated_filtered_rows": 10301,
+        "estimated_recall": 0.95,
+        "expected_qps_class": "high",
+        "required_indexes": [
+          "my_table_image_vec_idx"
+        ],
+        "session_settings": [
+          "SET LOCAL hnsw.ef_search = 100;",
+          "SET LOCAL hnsw.iterative_scan = strict_order;",
+          "SET LOCAL hnsw.scan_mem_multiplier = 2.0;",
+          "SET LOCAL enable_seqscan = off;",
+          "SET LOCAL enable_bitmapscan = off;"
+        ],
+        "rewritten_sql": "SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "validation_sql": "EXPLAIN (ANALYZE, BUFFERS) SELECT id FROM my_table WHERE equal = 27 ORDER BY (image_vec <-> (SELECT image_vec FROM my_table WHERE id = 987232)) LIMIT 100",
+        "why_safe": "Increased memory multiplier may improve recall without performance penalty.",
+        "why_faster_than_default": "More memory can reduce I/O and improve speed.",
+        "fallback_plan": "Reduce multiplier",
+        "assumptions": "System has available memory for multiplier.",
+        "missing_stats": "None"
+      }
+    ]
+  }
+]

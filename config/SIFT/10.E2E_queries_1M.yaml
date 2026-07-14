@@ -1,0 +1,91 @@
+SIFT:
+- name: query1
+  vector_field: image_vec
+  reference_vector_name: 987232
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 27
+    logic: and
+  limit: 100
+- name: query2
+  vector_field: image_vec
+  reference_vector_name: 79955
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 63
+    logic: and
+  limit: 100
+- name: query3
+  vector_field: image_vec
+  reference_vector_name: 567131
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 5
+    logic: and
+  limit: 100
+- name: query4
+  vector_field: image_vec
+  reference_vector_name: 500892
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 82
+    logic: and
+  limit: 100
+- name: query5
+  vector_field: image_vec
+  reference_vector_name: 55400
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 91
+    logic: and
+  limit: 100
+- name: query6
+  vector_field: image_vec
+  reference_vector_name: 135050
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 14
+    logic: and
+  limit: 100
+- name: query7
+  vector_field: image_vec
+  reference_vector_name: 733379
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 57
+    logic: and
+  limit: 100
+- name: query8
+  vector_field: image_vec
+  reference_vector_name: 732058
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 37
+    logic: and
+  limit: 100
+- name: query9
+  vector_field: image_vec
+  reference_vector_name: 51334
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 99
+    logic: and
+  limit: 100
+- name: query10
+  vector_field: image_vec
+  reference_vector_name: 731480
+  scalar_filters:
+  - field: equal
+    operator: ==
+    value: 23
+    logic: and
+  limit: 100
