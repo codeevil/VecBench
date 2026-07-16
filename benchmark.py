@@ -4,7 +4,7 @@ import os
 from databases.pgvector import PGVector
 from databases.milvus import Milvus
 from databases.qdrant import Qdrant
-# from databases.weaviate import Weaviate  # placeholder pkg broken on Python 3.13
+from databases.weaviate import Weaviate
 
 from data.load_yfcc import load_dataset_with_scalars, perform_incremental_load, perform_update, perform_delete
 
@@ -117,7 +117,7 @@ def setup_database(args, config):
     elif args.database == 'qdrant':
         db = Qdrant(config, args.database)
     elif args.database == 'weaviate':
-        raise NotImplementedError('Weaviate placeholder package broken on Python 3.13')
+        db = Weaviate(config, args.database)
     else:
         raise ValueError("Only support 'pgvector'、'milvus'、'qdrant'、'weaviate' now.")
     db.connect()

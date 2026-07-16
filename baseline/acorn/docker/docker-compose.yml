@@ -1,0 +1,75 @@
+name: pg_acorn_bench
+
+services:
+  postgres:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bench
+    shm_size: 4gb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ..:/workspace
+      - pgdata:/var/lib/postgresql/data
+      - ../docker/bench-initdb.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cd /workspace &&
+        make PG_CONFIG=$$PG_CONFIG install &&
+        exec docker-entrypoint.sh postgres \
+          -c shared_preload_libraries=pg_acorn \
+          -c shared_buffers=${PG_SHARED_BUFFERS:-2GB} \
+          -c work_mem=${PG_WORK_MEM:-64MB} \
+          -c jit=${PG_JIT:-off} \
+          -c max_parallel_workers_per_gather=${PG_MPWG:-0} \
+          -c effective_io_concurrency=${PG_EIC:-0} \
+          -c track_io_timing=${PG_TRACK_IO:-on}
+
+  qdrant:
+    image: qdrant/qdrant:v1.16.0
+    environment:
+      # 0 = auto (one thread per CPU); 1 = single-threaded search (FAIR-1T)
+      QDRANT__STORAGE__PERFORMANCE__MAX_SEARCH_THREADS: ${QDRANT_MAX_SEARCH_THREADS:-1}
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:6333/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  bench:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
+    command: >
+      python3 bench/run_bench.py
+        --dsn "postgresql://postgres:postgres@postgres/bench"
+        --scenario ${BENCH_SCENARIO:-all}
+        --output bench/results.json
+    profiles:
+      - bench
+
+volumes:
+  pgdata: {}
+  qdrant_storage: {}

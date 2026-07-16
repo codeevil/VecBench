@@ -14,7 +14,11 @@ pgvector:
 #   port: 6333
 #   grpc_port: 6334
 
-weaviate:
-  host: http://localhost:8080
-  port: 8080
-  grpc_port: 50051
+# weaviate:
+#   host: http://localhost:8080
+#   port: 8080
+#   grpc_port: 50051
+
+milvus:
+  host: localhost
+  port: 19530

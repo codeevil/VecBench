@@ -49,6 +49,11 @@ venv.bak/
 # Logs
 *.log
 
+# Temporary directories
+tmp/
+/tmp/
+baseline/milvus/volumes/
+
 CLAUDE.md
 .claude/
 AGENTS.md

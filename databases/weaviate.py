@@ -92,7 +92,8 @@ class Weaviate(BaseVD):
             vector_index_config=Configure.VectorIndex.hnsw(
                 distance_metric=dist,
                 max_connections=hnsw_config.get("M", 16),
-                ef_construction=hnsw_config.get("efConstruction", 64)
+                ef_construction=hnsw_config.get("efConstruction", 64),
+                filter_strategy=VectorFilterStrategy.ACORN,
             )
         )
 
@@ -203,19 +204,12 @@ class Weaviate(BaseVD):
         # Weaviate scalar indexes are enabled via index_filterable=True
         print("Weaviate scalar index handled automatically.")
 
-    def query(self, query_config: dict, param: int):
+    def query(self, query_config: dict, param: int, algorithm: str = None):
         col = self.client.collections.get("my_table")
-        
-        col.config.update(
-                vector_index_config=Reconfigure.VectorIndex.hnsw(
-                    filter_strategy=VectorFilterStrategy.ACORN,  # 更新过滤策略
-                    flat_search_cutoff=0,
-                    ef=param,
-            ),
-        )   
 
-        # current_config = col.config.get()
-        # print(f"Verified ef: {current_config.vector_index_config}")
+        col.config.update(
+            vector_index_config=Reconfigure.VectorIndex.hnsw(ef=param),
+        )
 
         ref_id = query_config["reference_vector_name"]
         scalar_filters = query_config.get("scalar_filters", [])

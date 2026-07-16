@@ -12,20 +12,20 @@ pgvector:
       dimension: 128
       constraints: ""
 
-# milvus:
-#   table_name: my_table
-#   columns:
-#     - name: id
-#       type: INT64
-#       primary: True
-#       description: "id"
-#     - name: equal
-#       type: INT16
-#       description: "equal_val"
-#     - name: image_vec
-#       type: FLOAT_VECTOR
-#       dimension: 128
-#       description: "image_vec(128)"
+milvus:
+  table_name: my_table
+  columns:
+    - name: id
+      type: INT64
+      primary: True
+      description: "id"
+    - name: equal
+      type: INT16
+      description: "equal_val"
+    - name: image_vec
+      type: FLOAT_VECTOR
+      dimension: 128
+      description: "image_vec(128)"
 
 # qdrant:
 #   table_name: my_table

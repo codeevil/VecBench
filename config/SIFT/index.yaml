@@ -26,24 +26,24 @@ pgvector:
 #   search_params:
 #     ivfflat: [1000]
 
-# milvus:
-#   hnsw:
-#     - index_column: "image_vec"
-#       distance: L2
-#       params:
-#         - m: 16
-#           ef_construction: 64
-#   ivfflat:
-#     - index_column: "image_vec"
-#       distance: L2
-#       params:
-#         - nlist: 1000
-#   diskann:
-#     - index_column: "image_vec"
-#       distance: L2
-#       params: []
-#   scalar_index:
-#     - index_column: "equal"
+milvus:
+  hnsw:
+    - index_column: "image_vec"
+      distance: L2
+      params:
+        - m: 16
+          ef_construction: 64
+  ivfflat:
+    - index_column: "image_vec"
+      distance: L2
+      params:
+        - nlist: 1000
+  diskann:
+    - index_column: "image_vec"
+      distance: L2
+      params: []
+  scalar_index:
+    - index_column: "equal"
 
 # qdrant:
 #   scalar_index:
@@ -57,12 +57,15 @@ weaviate:
       params:
         - m: 16
           ef_construction: 64
-          filter_strategy: acorn  # <--- 关键配置：启用 ACORN 过滤策略
+          #filter_strategy: acorn  # <--- 关键配置：启用 ACORN 过滤策略
   search_params:
-    hnsw: [100, 200, 400]        # <--- 测试时扫描的 ef 参数列表
+    #hnsw: [100, 200, 400]        # <--- 测试时扫描的 ef 参数列表
+    #hnsw: [-1]
 
 search_params:
-  hnsw: [100, 100, 150, 200, 300, 400, 600, 800, 1000]
-  ivfflat: [1, 1, 2, 5, 10, 20, 30, 50, 80, 100, 150, 200, 300, 500, 800, 1000]
-  diskann: [100, 100, 120, 200, 300, 400, 600, 800, 1000]
-  hnsw_copy: [10, 10, 20, 40, 60, 80, 120, 200, 300, 400, 600, 800, 1000]
+  hnsw: [-1]
+  #hnsw: [100, 100, 150, 200, 300, 400, 600, 800, 1000]
+  #hnsw: [32, 64, 128, 256, 512]
+  #ivfflat: [1, 1, 2, 5, 10, 20, 30, 50, 80, 100, 150, 200, 300, 500, 800, 1000]
+  #diskann: [100, 100, 120, 200, 300, 400, 600, 800, 1000]
+  #hnsw_copy: [10, 10, 20, 40, 60, 80, 120, 200, 300, 400, 600, 800, 1000]

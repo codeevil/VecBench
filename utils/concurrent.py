@@ -333,7 +333,7 @@ def execute_concurrent(db_factory, queries, ground_truth, search_params, args):
                     "qps": qps,
                 })
 
-            print(f"Result -> QPS: {qps:.2f}, Avg Recall: {avg_recall:.4f}")
+            print(f"Result -> QPS: {qps:.2f}, Avg Recall: {avg_recall:.4f}, Total Time: {total_time:.2f}s")
 
     # 全部结束后打印结束信号
     print("BENCHMARK_END_SIGNAL")

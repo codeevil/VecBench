@@ -146,6 +146,9 @@ weaviate:
   host: http://localhost:8080
   grpc_port: 50051
 ```
+# python benchmark.py --case test --database weaviate --dataset SIFT --concurrency 1
+#source ~/wsh-env/wsh/bin/activate
+
 
 ### 3. Initialize Database and Load Data
 

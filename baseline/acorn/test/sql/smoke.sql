@@ -1,0 +1,28 @@
+-- smoke.sql: extension loads and basic objects are registered
+-- TDD: golden file starts empty; populate after implementation passes
+
+\set ON_ERROR_STOP on
+
+CREATE SCHEMA test_smoke;
+CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS pg_acorn;
+SET search_path = test_smoke, public;
+
+-- acorn_hnsw AM must be registered in catalog
+SELECT amname FROM pg_am WHERE amname = 'acorn_hnsw';
+
+-- GUCs must exist
+SHOW pg_acorn.enable_hook;
+SHOW pg_acorn.default_gamma;
+
+-- vector type works (basic pgvector sanity)
+CREATE TABLE items (id int, embedding vector(3));
+INSERT INTO items VALUES (1, '[1,0,0]'), (2, '[0,1,0]'), (3, '[0,0,1]');
+
+-- standard pgvector hnsw index still works with extension loaded
+CREATE INDEX ON items USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 4, ef_construction = 16);
+
+SELECT COUNT(*) FROM items WHERE id > 0;
+
+DROP SCHEMA test_smoke CASCADE;

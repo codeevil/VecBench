@@ -1,0 +1,100 @@
+# Phase D — Qdrant rematch with HNSW forced (250K, correlated fixture)
+
+Date: 2026-06-14. Harness: `bench/qdrant_rematch.py`. Result:
+`bench/results_qdrant_rematch.json`. Qdrant v1.16.0 container.
+
+## CORRECTION 2026-06-14 — the recall verdict below was WRONG (stale acorn data)
+
+The verdict further down ("Qdrant wins; acorn caps ~0.91-0.94 at sel 10/20%")
+compared CURRENT Qdrant against acorn numbers from `results_thesis_250k.json`,
+which predate the Z3 buffered-emission fix. Those caps were the emission-order
+bug Z3 already fixed — NOT a graph limitation. A controlled gamma sweep on the
+SAME correlated fixture with the current binary (`bench/gamma_sweep.py`,
+`results_gamma_sweep.json`), cross-checked against the post-Z3
+`results_emission_250k_quiet.json` (agree exactly), shows acorn does NOT cap:
+
+| sel | acorn g2 ef800 | acorn g2 ef1600 | acorn g4 ef800 | Qdrant ef800 |
+|----:|---:|---:|---:|---:|
+| 10% | 0.993 | 1.000 | 1.000 | 1.000 |
+| 20% | 0.963 | 0.995 | 1.000 | 0.973 |
+
+Corrected recall verdict: **current acorn matches Qdrant on recall** (g2 within
+~0.01; g4 matches/beats). The recall gap was an artifact of comparing current
+Qdrant to pre-Z3 acorn. Higher gamma reaches the same recall at LOWER ef
+(sel=20% -> ~0.95 needs ef~700 at g2, ef~400 at g4; sel=10% -> 0.94 needs
+ef~400 at g2, ef~200 at g4), which should also lower latency-at-recall — and
+gamma 3/4 were never benchmarked before. The LATENCY comparison below also used
+stale/noisy acorn latency and remains OPEN: a clean current-binary acorn
+latency run on the correlated fixture vs Qdrant is still needed before any
+latency verdict. Treat everything below as the (flawed) original record.
+
+## What this fixes
+
+Prior Qdrant numbers (`QDRANT_CODEPATH.md`) measured exact brute-force — no
+segment crossed the per-segment indexing threshold, so no HNSW graph existed
+(recall 1.000 everywhere by construction). This run forces filtered HNSW:
+`optimizers_config.indexing_threshold = 10` (KB, indexes every segment) and
+`hnsw_config.full_scan_threshold = 10` (KB ~ 20 points, so filtered queries
+use the graph, not a full scan), m=16 ef_construct=64 to match acorn/pgvector.
+
+HNSW-engaged gate: **sel=10% ef=40 recall = 0.302** (« 1.0). The graph is
+genuinely being searched — this is the first valid acorn-vs-Qdrant-HNSW
+comparison. Same fixture as `thesis_validation.py` (seed 0, CORRELATED buckets
+— the hard case where the filter correlates with vector position), same
+queries, same exact ground truth, same `bucket < sel` semantics.
+
+## Matched-recall comparison (recall >= ~0.95 money cell; median ms)
+
+| sel | Qdrant HNSW | acorn g2 in-filter (results_thesis_250k) | verdict |
+|----:|---|---|---|
+| 1% | ef100 r0.98, 6.5 ms | ef100 r0.97, ~7 ms | ~tie |
+| 2% | ef100 r0.99, 6.2 ms | ef200 r0.98, ~57 ms | Qdrant faster |
+| 5% | ef200 r0.98, 20 ms | ef400 r0.95, ~148 ms | Qdrant faster |
+| 10% | ef400 r0.98, 23 ms; ef800 r1.0, 65 ms | caps ~0.94 (never reaches 0.95) | Qdrant: higher recall AND faster |
+| 20% | ef800 r0.97, 139 ms | caps ~0.85-0.91 (never reaches 0.95) | Qdrant: reaches recall acorn cannot |
+
+## Verdict — honest  [SUPERSEDED — see top CORRECTION + bench/COMPETITIVE_VERDICT.md]
+
+> This entire verdict used pre-Z3 stale acorn data and its recall-ceiling
+> conclusion is WRONG. Post-Z3 acorn reaches 0.97-1.0 (recall PARITY with
+> Qdrant). Kept only as the flawed original record. For the current position
+> see `bench/COMPETITIVE_VERDICT.md`.
+
+**Qdrant's filtered HNSW beats acorn on this fixture.** Two distinct gaps:
+
+1. ~~Recall ceiling~~ **(WRONG — stale pre-Z3 data).** The original text claimed
+   acorn "caps at ~0.91-0.94 at sel 10/20% and cannot reach 0.95+ at any ef".
+   This was the emission-order bug Z3 fixed, NOT a graph limit — current acorn
+   reaches 0.97-1.0 (see the CORRECTION at the top of this file). There is no
+   recall ceiling.
+2. Latency at matched recall: Qdrant is ~2-9x faster at sel 2-5%. (Caveat: the
+   acorn latencies here are from a contention-noisy thesis run and predate the
+   cache/prefetch work; the recall-ceiling gap is the cleaner, load-independent
+   finding. A clean acorn re-run on the correlated fixture with the current
+   optimized binary would tighten the latency numbers but cannot close the
+   recall ceiling.)
+
+## What this does and does not change
+
+- Does NOT change the pgvector result: acorn still beats pgvector's prefilter,
+  postfilter, and iterative scan IN POSTGRES. That is acorn's value
+  proposition — best filtered ANN inside Postgres (transactional, SQL,
+  joinable, on-disk), not "beats a dedicated engine."
+- Confirms the expected category gap: Qdrant is a dedicated in-memory Rust
+  vector engine with no transactional/MVCC/buffer-manager overhead. It being
+  faster and higher-recall on pure filtered ANN is the baseline, not a
+  surprise.
+- Surfaces a genuine acorn limitation worth recording: the in-filter recall
+  ceiling on correlated high-selectivity filters. Closing it (richer gamma,
+  a different filtered-traversal heuristic like NaviX-Directed / FAVOR, or a
+  filter-aware entry-point strategy) is exactly what roadmap Phase 2 targets.
+
+## Caveats
+
+- Qdrant ran from the host (in-memory, no PG layer); acorn runs in PostgreSQL.
+  Different cost structures — the latency comparison is indicative, not a
+  controlled same-substrate measurement.
+- Single fixture (correlated, the hard case). On a uniform/independent filter,
+  acorn reaches 0.99/0.96 at sel 10/20% (see the emission results) and the gap
+  would narrow; a uniform-fixture Qdrant rematch was not run.
+- 250K, dim=128, single dev host.
