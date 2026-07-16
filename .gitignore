@@ -41,9 +41,11 @@ venv.bak/
 
 # Project specific
 # perf_result/
-# *.hdf5
-# *.bin
+*.hdf5
+*.bin
 # *.json
+*.ivecs
+*.fvecs
 # ground_truth/
 
 # Logs

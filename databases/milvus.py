@@ -219,7 +219,7 @@ class Milvus(BaseVD):
             })
         print(results)
 
-    def query(self, query_config, param=None):
+    def query(self, query_config, param=None, algorithm=None):
         self.collection = Collection('my_table')
         vector_field = query_config['vector_field']
         reference_vector_name = query_config['reference_vector_name']
@@ -265,8 +265,7 @@ class Milvus(BaseVD):
             'ann_field': vector_field,
             'param': {
                 'metric_type': "L2",
-                'params': {'ef': param, 'nprobe': param, 'search_list': param},
-
+                'params': {'ef': param if param is not None and param > 0 else max(100, limit), 'nprobe': param, 'search_list': param},
             },
             'limit': limit,
             'expr': expr,
