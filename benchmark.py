@@ -41,6 +41,12 @@ def _get_data_dimension(dataset):
             with open(os.path.join(data_dir, fname), 'rb') as f:
                 f.read(4)  # skip nvecs
                 return int.from_bytes(f.read(4), 'little')
+    # Try fvecs files (PAPER) inside a subdirectory
+    for root, dirs, files in os.walk(data_dir):
+        for fname in sorted(files):
+            if fname.endswith('.fvecs'):
+                with open(os.path.join(root, fname), 'rb') as f:
+                    return int.from_bytes(f.read(4), 'little')
     return None
 
 

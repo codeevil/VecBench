@@ -1,0 +1,4 @@
+Paper dataset has three labels, i.e., <publication> <topic> <affiliation>; these labels' values are shown as follows (separated by spaces).
+<publication>: SIGMOD VLDB CVPR
+<topic>: DB CV
+<affiliation>: university industrial

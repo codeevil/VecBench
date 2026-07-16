@@ -1,0 +1,19 @@
+pgvector:
+  table_name: my_paper
+  columns:
+    - name: id
+      type: INT
+      constraints: 'PRIMARY KEY'
+    - name: equal
+      type: smallint
+      constraints: ""
+    - name: topic
+      type: smallint
+      constraints: ""
+    - name: aff
+      type: smallint
+      constraints: ""
+    - name: image_vec
+      type: VECTOR
+      dimension: 200
+      constraints: ""

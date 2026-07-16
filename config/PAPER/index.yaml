@@ -1,0 +1,23 @@
+pgvector:
+  hnsw:
+    - index_column: "image_vec"
+      distance: vector_l2_ops
+      params:
+        - m: 32
+          ef_construction: 300
+  ivfflat:
+    - index_column: "image_vec"
+      distance: vector_l2_ops
+      params:
+        - lists: 1000
+  scalar_index:
+    - index_column: "equal"
+      type: btree
+    - index_column: "topic"
+      type: btree
+    - index_column: "aff"
+      type: btree
+
+search_params:
+  hnsw: [100]
+  ivfflat: [50]

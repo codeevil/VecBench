@@ -37,6 +37,57 @@ def load_sparse_matrix(path):
         data     = np.fromfile(f, np.float32, nnz)
     return csr_matrix((data, indices, indptr), shape=(nrow, ncol))
 
+def read_fvecs(filename):
+    """Read .fvecs format: each vector = 1 int32 dim + dim float32 values."""
+    with open(filename, "rb") as f:
+        raw = f.read()
+    offset = 0
+    vectors = []
+    while offset < len(raw):
+        dim = int(np.frombuffer(raw[offset:offset+4], dtype=np.int32)[0])
+        offset += 4
+        vec = np.frombuffer(raw[offset:offset+dim*4], dtype=np.float32).copy()
+        offset += dim * 4
+        vectors.append(vec)
+    return np.array(vectors)
+
+def read_ivecs(filename):
+    """Read .ivecs format: each vector = 1 int32 dim + dim int32 values."""
+    with open(filename, "rb") as f:
+        raw = f.read()
+    offset = 0
+    vectors = []
+    while offset < len(raw):
+        dim = int(np.frombuffer(raw[offset:offset+4], dtype=np.int32)[0])
+        offset += 4
+        vec = np.frombuffer(raw[offset:offset+dim*4], dtype=np.int32).copy()
+        offset += dim * 4
+        vectors.append(vec)
+    return np.array(vectors)
+
+def read_paper_labels(txt_path):
+    """Parse PAPER label text file. First line: '<count> 3'. Rest: '<pub> <topic> <affiliation>'."""
+    labels = []
+    with open(txt_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    if not lines:
+        return labels
+    header = lines[0].strip().split()
+    expected_n = int(header[0]) if header else 0
+    pub_map = {"SIGMOD": 0, "VLDB": 1, "CVPR": 2}
+    topic_map = {"DB": 0, "CV": 1}
+    aff_map = {"university": 0, "industrial": 1}
+    for line in lines[1:1+expected_n]:
+        parts = line.strip().split()
+        if len(parts) < 3:
+            continue
+        labels.append({
+            "equal": pub_map.get(parts[0], 0),
+            "topic": topic_map.get(parts[1], 0),
+            "aff": aff_map.get(parts[2], 0),
+        })
+    return labels
+
 def save_scalar_bin(arr, filename):
     n = arr.shape[0]
     with open(filename, 'wb') as f:
@@ -66,6 +117,13 @@ def load_dataset_with_scalars(base_dir, args, as_list=True):
             vecs = load_u8bin(os.path.join(base_dir, 'base.10M.1920d.u8bin'))
             smat = load_sparse_matrix(os.path.join(base_dir, 'base.metadata.10M.spmat'))
             total_n = vecs.shape[0]
+        elif dataset_name == 'PAPER':
+            vecs = read_fvecs(os.path.join(base_dir, 'paper', 'paper_base.fvecs'))
+            total_n = vecs.shape[0]
+            smat = None
+            paper_labels = read_paper_labels(os.path.join(base_dir, 'paper_label', 'label_paper_base.txt'))
+            n_labels = min(len(paper_labels), total_n)
+            paper_labels = paper_labels[:n_labels]
         else:
             hdf5_map = {
                 "GIST": "gist-960-euclidean.hdf5",
@@ -91,12 +149,20 @@ def load_dataset_with_scalars(base_dir, args, as_list=True):
             idx = np.arange(total_n)
             new_n = total_n
 
-        eq_file = "equal_cluster.u2bin" if dataset_name == 'YFCC' else f"{dataset_name.lower()}_scalar.bin"
-        equal_vals = load_scalar_bin(os.path.join(base_dir, eq_file), np.uint16)[idx]
-        
         if dataset_name == 'YFCC':
+            equal_vals = load_scalar_bin(os.path.join(base_dir, "equal_cluster.u2bin"), np.uint16)[idx]
             range_vals = load_scalar_bin(os.path.join(base_dir, 'range.f4bin'), np.float32)[idx]
+        elif dataset_name == 'PAPER':
+            if new_n > n_labels:
+                new_n = n_labels
+                idx = idx[:new_n]
+            equal_vals = np.array([paper_labels[i]["equal"] for i in idx], dtype=np.uint16)
+            topic_vals = np.array([paper_labels[i]["topic"] for i in idx], dtype=np.uint16)
+            aff_vals = np.array([paper_labels[i]["aff"] for i in idx], dtype=np.uint16)
+            range_vals = np.zeros(new_n, dtype=np.float32)
         else:
+            eq_file = f"{dataset_name.lower()}_scalar.bin"
+            equal_vals = load_scalar_bin(os.path.join(base_dir, eq_file), np.uint16)[idx]
             range_vals = np.zeros(new_n, dtype=np.float32)
 
         start_id = 1
@@ -125,11 +191,18 @@ def load_dataset_with_scalars(base_dir, args, as_list=True):
             else:
                 data_dict["tags"] = [[] for _ in range(e - s)]
 
+            if dataset_name == 'PAPER':
+                data_dict["topic"] = topic_vals[s:e]
+                data_dict["aff"] = aff_vals[s:e]
+
             df = pd.DataFrame(data_dict)
             start_id += (e - s)
 
-            vector_cols = ["image_vec"] 
-            scalar_cols = ["equal", "range", "tags"]
+            vector_cols = ["image_vec"]
+            if dataset_name == 'PAPER':
+                scalar_cols = ["equal", "topic", "aff", "range", "tags"]
+            else:
+                scalar_cols = ["equal", "range", "tags"]
             
             yield df, vector_cols, scalar_cols
             
@@ -149,7 +222,7 @@ def load_incremental_meta(paths):
     """Load and validate metadata for the incremental dataset."""
     if not all(os.path.exists(p) for p in paths.values()):
         raise FileNotFoundError("Missing incremental data files. Please run the Incremental Load Phase first.")
-    with open(paths["info"], "r") as f:
+    with open(paths["info"], "r", encoding="utf-8") as f:
         return json.load(f)
 
 def load_incremental_data(paths):
@@ -296,7 +369,7 @@ def perform_delete(db, incremental_dir):
     if not os.path.exists(paths["info"]):
         raise FileNotFoundError("Incremental data metadata is missing; please perform incremental loading first.")
     
-    with open(paths["info"], "r") as f:
+    with open(paths["info"], "r", encoding="utf-8") as f:
         inc_info = json.load(f)
     incremental_ids = list(range(inc_info["min_inc_id"], inc_info["max_inc_id"] + 1))
     print(f"Deleting {len(incremental_ids)} incremental rows...")
