@@ -1,901 +1,901 @@
 PAPER:
 - name: query1
   vector_field: image_vec
-  reference_vector_name: 84
+  reference_vector_name: 987232
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 28
     logic: and
   limit: 100
 - name: query2
   vector_field: image_vec
-  reference_vector_name: 54
+  reference_vector_name: 79955
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 64
     logic: and
   limit: 100
 - name: query3
   vector_field: image_vec
-  reference_vector_name: 71
+  reference_vector_name: 567131
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 6
     logic: and
   limit: 100
 - name: query4
   vector_field: image_vec
-  reference_vector_name: 46
+  reference_vector_name: 500892
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 83
     logic: and
   limit: 100
 - name: query5
   vector_field: image_vec
-  reference_vector_name: 45
+  reference_vector_name: 55400
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 92
     logic: and
   limit: 100
 - name: query6
   vector_field: image_vec
-  reference_vector_name: 40
+  reference_vector_name: 135050
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 15
     logic: and
   limit: 100
 - name: query7
   vector_field: image_vec
-  reference_vector_name: 23
+  reference_vector_name: 733379
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 58
     logic: and
   limit: 100
 - name: query8
   vector_field: image_vec
-  reference_vector_name: 81
+  reference_vector_name: 732058
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 38
     logic: and
   limit: 100
 - name: query9
   vector_field: image_vec
-  reference_vector_name: 11
+  reference_vector_name: 51334
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 100
     logic: and
   limit: 100
 - name: query10
   vector_field: image_vec
-  reference_vector_name: 1
+  reference_vector_name: 731480
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 24
     logic: and
   limit: 100
 - name: query11
   vector_field: image_vec
-  reference_vector_name: 19
+  reference_vector_name: 399759
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 82
     logic: and
   limit: 100
 - name: query12
   vector_field: image_vec
-  reference_vector_name: 31
+  reference_vector_name: 401398
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 5
     logic: and
   limit: 100
 - name: query13
   vector_field: image_vec
-  reference_vector_name: 74
+  reference_vector_name: 855486
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 50
     logic: and
   limit: 100
 - name: query14
   vector_field: image_vec
-  reference_vector_name: 34
+  reference_vector_name: 858885
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 83
     logic: and
   limit: 100
 - name: query15
   vector_field: image_vec
-  reference_vector_name: 91
+  reference_vector_name: 503248
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 27
     logic: and
   limit: 100
 - name: query16
   vector_field: image_vec
-  reference_vector_name: 5
+  reference_vector_name: 864742
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 25
     logic: and
   limit: 100
 - name: query17
   vector_field: image_vec
-  reference_vector_name: 77
+  reference_vector_name: 35033
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 11
     logic: and
   limit: 100
 - name: query18
   vector_field: image_vec
-  reference_vector_name: 78
+  reference_vector_name: 995704
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 5
     logic: and
   limit: 100
 - name: query19
   vector_field: image_vec
-  reference_vector_name: 13
+  reference_vector_name: 376762
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 52
     logic: and
   limit: 100
 - name: query20
   vector_field: image_vec
-  reference_vector_name: 32
+  reference_vector_name: 811354
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 34
     logic: and
   limit: 100
 - name: query21
   vector_field: image_vec
-  reference_vector_name: 56
+  reference_vector_name: 577746
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 90
     logic: and
   limit: 100
 - name: query22
   vector_field: image_vec
-  reference_vector_name: 89
+  reference_vector_name: 659807
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 40
     logic: and
   limit: 100
 - name: query23
   vector_field: image_vec
-  reference_vector_name: 27
+  reference_vector_name: 219340
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 87
     logic: and
   limit: 100
 - name: query24
   vector_field: image_vec
-  reference_vector_name: 43
+  reference_vector_name: 979756
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 48
     logic: and
   limit: 100
 - name: query25
   vector_field: image_vec
-  reference_vector_name: 70
+  reference_vector_name: 625692
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 1
     logic: and
   limit: 100
 - name: query26
   vector_field: image_vec
-  reference_vector_name: 16
+  reference_vector_name: 215340
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 75
     logic: and
   limit: 100
 - name: query27
   vector_field: image_vec
-  reference_vector_name: 41
+  reference_vector_name: 443418
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 56
     logic: and
   limit: 100
 - name: query28
   vector_field: image_vec
-  reference_vector_name: 97
+  reference_vector_name: 980329
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 68
     logic: and
   limit: 100
 - name: query29
   vector_field: image_vec
-  reference_vector_name: 10
+  reference_vector_name: 336984
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 29
     logic: and
   limit: 100
 - name: query30
   vector_field: image_vec
-  reference_vector_name: 73
+  reference_vector_name: 518813
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 67
     logic: and
   limit: 100
 - name: query31
   vector_field: image_vec
-  reference_vector_name: 12
+  reference_vector_name: 943379
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 9
     logic: and
   limit: 100
 - name: query32
   vector_field: image_vec
-  reference_vector_name: 48
+  reference_vector_name: 2086
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 38
     logic: and
   limit: 100
 - name: query33
   vector_field: image_vec
-  reference_vector_name: 86
+  reference_vector_name: 663616
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 77
     logic: and
   limit: 100
 - name: query34
   vector_field: image_vec
-  reference_vector_name: 29
+  reference_vector_name: 677815
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 98
     logic: and
   limit: 100
 - name: query35
   vector_field: image_vec
-  reference_vector_name: 94
+  reference_vector_name: 957738
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 2
     logic: and
   limit: 100
 - name: query36
   vector_field: image_vec
-  reference_vector_name: 6
+  reference_vector_name: 543083
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 49
     logic: and
   limit: 100
 - name: query37
   vector_field: image_vec
-  reference_vector_name: 67
+  reference_vector_name: 529928
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 44
     logic: and
   limit: 100
 - name: query38
   vector_field: image_vec
-  reference_vector_name: 66
+  reference_vector_name: 66337
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 30
     logic: and
   limit: 100
 - name: query39
   vector_field: image_vec
-  reference_vector_name: 36
+  reference_vector_name: 272967
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 32
     logic: and
   limit: 100
 - name: query40
   vector_field: image_vec
-  reference_vector_name: 17
+  reference_vector_name: 876376
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 18
     logic: and
   limit: 100
 - name: query41
   vector_field: image_vec
-  reference_vector_name: 50
+  reference_vector_name: 443182
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 68
     logic: and
   limit: 100
 - name: query42
   vector_field: image_vec
-  reference_vector_name: 35
+  reference_vector_name: 38748
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 19
     logic: and
   limit: 100
 - name: query43
   vector_field: image_vec
-  reference_vector_name: 8
+  reference_vector_name: 244519
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 3
     logic: and
   limit: 100
 - name: query44
   vector_field: image_vec
-  reference_vector_name: 96
+  reference_vector_name: 321942
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 34
     logic: and
   limit: 100
 - name: query45
   vector_field: image_vec
-  reference_vector_name: 28
+  reference_vector_name: 212424
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 86
     logic: and
   limit: 100
 - name: query46
   vector_field: image_vec
-  reference_vector_name: 20
+  reference_vector_name: 684488
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 37
     logic: and
   limit: 100
 - name: query47
   vector_field: image_vec
-  reference_vector_name: 82
+  reference_vector_name: 460022
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 72
     logic: and
   limit: 100
 - name: query48
   vector_field: image_vec
-  reference_vector_name: 26
+  reference_vector_name: 330798
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 86
     logic: and
   limit: 100
 - name: query49
   vector_field: image_vec
-  reference_vector_name: 63
+  reference_vector_name: 820288
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 99
     logic: and
   limit: 100
 - name: query50
   vector_field: image_vec
-  reference_vector_name: 14
+  reference_vector_name: 934969
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 88
     logic: and
   limit: 100
 - name: query51
   vector_field: image_vec
-  reference_vector_name: 25
+  reference_vector_name: 878903
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 10
     logic: and
   limit: 100
 - name: query52
   vector_field: image_vec
-  reference_vector_name: 4
+  reference_vector_name: 507015
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 84
     logic: and
   limit: 100
 - name: query53
   vector_field: image_vec
-  reference_vector_name: 18
+  reference_vector_name: 63469
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 61
     logic: and
   limit: 100
 - name: query54
   vector_field: image_vec
-  reference_vector_name: 39
+  reference_vector_name: 568671
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 92
     logic: and
   limit: 100
 - name: query55
   vector_field: image_vec
-  reference_vector_name: 9
+  reference_vector_name: 855772
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 92
     logic: and
   limit: 100
 - name: query56
   vector_field: image_vec
-  reference_vector_name: 79
+  reference_vector_name: 606373
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 17
     logic: and
   limit: 100
 - name: query57
   vector_field: image_vec
-  reference_vector_name: 7
+  reference_vector_name: 358901
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 61
     logic: and
   limit: 100
 - name: query58
   vector_field: image_vec
-  reference_vector_name: 65
+  reference_vector_name: 178393
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 66
     logic: and
   limit: 100
 - name: query59
   vector_field: image_vec
-  reference_vector_name: 37
+  reference_vector_name: 921915
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 63
     logic: and
   limit: 100
 - name: query60
   vector_field: image_vec
-  reference_vector_name: 90
+  reference_vector_name: 348366
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 77
     logic: and
   limit: 100
 - name: query61
   vector_field: image_vec
-  reference_vector_name: 57
+  reference_vector_name: 377483
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 23
     logic: and
   limit: 100
 - name: query62
   vector_field: image_vec
-  reference_vector_name: 100
+  reference_vector_name: 44793
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 64
     logic: and
   limit: 100
 - name: query63
   vector_field: image_vec
-  reference_vector_name: 55
+  reference_vector_name: 690928
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 46
     logic: and
   limit: 100
 - name: query64
   vector_field: image_vec
-  reference_vector_name: 44
+  reference_vector_name: 50314
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 64
     logic: and
   limit: 100
 - name: query65
   vector_field: image_vec
-  reference_vector_name: 51
+  reference_vector_name: 780882
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 34
     logic: and
   limit: 100
 - name: query66
   vector_field: image_vec
-  reference_vector_name: 68
+  reference_vector_name: 18959
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 42
     logic: and
   limit: 100
 - name: query67
   vector_field: image_vec
-  reference_vector_name: 47
+  reference_vector_name: 804704
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 43
     logic: and
   limit: 100
 - name: query68
   vector_field: image_vec
-  reference_vector_name: 69
+  reference_vector_name: 8986
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 14
     logic: and
   limit: 100
 - name: query69
   vector_field: image_vec
-  reference_vector_name: 62
+  reference_vector_name: 99902
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 68
     logic: and
   limit: 100
 - name: query70
   vector_field: image_vec
-  reference_vector_name: 98
+  reference_vector_name: 655319
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 23
     logic: and
   limit: 100
 - name: query71
   vector_field: image_vec
-  reference_vector_name: 80
+  reference_vector_name: 224929
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 33
     logic: and
   limit: 100
 - name: query72
   vector_field: image_vec
-  reference_vector_name: 42
+  reference_vector_name: 926626
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 74
     logic: and
   limit: 100
 - name: query73
   vector_field: image_vec
-  reference_vector_name: 59
+  reference_vector_name: 67899
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 56
     logic: and
   limit: 100
 - name: query74
   vector_field: image_vec
-  reference_vector_name: 49
+  reference_vector_name: 68879
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 95
     logic: and
   limit: 100
 - name: query75
   vector_field: image_vec
-  reference_vector_name: 99
+  reference_vector_name: 904485
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 66
     logic: and
   limit: 100
 - name: query76
   vector_field: image_vec
-  reference_vector_name: 58
+  reference_vector_name: 244300
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 10
     logic: and
   limit: 100
 - name: query77
   vector_field: image_vec
-  reference_vector_name: 76
+  reference_vector_name: 912238
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 53
     logic: and
   limit: 100
 - name: query78
   vector_field: image_vec
-  reference_vector_name: 33
+  reference_vector_name: 803685
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 67
     logic: and
   limit: 100
 - name: query79
   vector_field: image_vec
-  reference_vector_name: 95
+  reference_vector_name: 444937
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 8
     logic: and
   limit: 100
 - name: query80
   vector_field: image_vec
-  reference_vector_name: 60
+  reference_vector_name: 895959
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 44
     logic: and
   limit: 100
 - name: query81
   vector_field: image_vec
-  reference_vector_name: 64
+  reference_vector_name: 858829
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 22
     logic: and
   limit: 100
 - name: query82
   vector_field: image_vec
-  reference_vector_name: 85
+  reference_vector_name: 575348
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 96
     logic: and
   limit: 100
 - name: query83
   vector_field: image_vec
-  reference_vector_name: 38
+  reference_vector_name: 464017
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 9
     logic: and
   limit: 100
 - name: query84
   vector_field: image_vec
-  reference_vector_name: 30
+  reference_vector_name: 196830
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 22
     logic: and
   limit: 100
 - name: query85
   vector_field: image_vec
-  reference_vector_name: 2
+  reference_vector_name: 309024
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 41
     logic: and
   limit: 100
 - name: query86
   vector_field: image_vec
-  reference_vector_name: 53
+  reference_vector_name: 347382
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 78
     logic: and
   limit: 100
 - name: query87
   vector_field: image_vec
-  reference_vector_name: 22
+  reference_vector_name: 310805
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 1
     logic: and
   limit: 100
 - name: query88
   vector_field: image_vec
-  reference_vector_name: 3
+  reference_vector_name: 837524
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 33
     logic: and
   limit: 100
 - name: query89
   vector_field: image_vec
-  reference_vector_name: 24
+  reference_vector_name: 268241
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 12
     logic: and
   limit: 100
 - name: query90
   vector_field: image_vec
-  reference_vector_name: 88
+  reference_vector_name: 366138
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 40
     logic: and
   limit: 100
 - name: query91
   vector_field: image_vec
-  reference_vector_name: 92
+  reference_vector_name: 449597
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 66
     logic: and
   limit: 100
 - name: query92
   vector_field: image_vec
-  reference_vector_name: 75
+  reference_vector_name: 586918
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 63
     logic: and
   limit: 100
 - name: query93
   vector_field: image_vec
-  reference_vector_name: 87
+  reference_vector_name: 980754
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 74
     logic: and
   limit: 100
 - name: query94
   vector_field: image_vec
-  reference_vector_name: 83
+  reference_vector_name: 51663
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 75
     logic: and
   limit: 100
 - name: query95
   vector_field: image_vec
-  reference_vector_name: 21
+  reference_vector_name: 892874
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 87
     logic: and
   limit: 100
 - name: query96
   vector_field: image_vec
-  reference_vector_name: 61
+  reference_vector_name: 576799
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 53
     logic: and
   limit: 100
 - name: query97
   vector_field: image_vec
-  reference_vector_name: 72
+  reference_vector_name: 480867
   scalar_filters:
   - field: equal
     operator: ==
-    value: 0
+    value: 13
     logic: and
   limit: 100
 - name: query98
   vector_field: image_vec
-  reference_vector_name: 15
+  reference_vector_name: 550671
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 53
     logic: and
   limit: 100
 - name: query99
   vector_field: image_vec
-  reference_vector_name: 93
+  reference_vector_name: 584292
   scalar_filters:
   - field: equal
     operator: ==
-    value: 2
+    value: 84
     logic: and
   limit: 100
 - name: query100
   vector_field: image_vec
-  reference_vector_name: 52
+  reference_vector_name: 362132
   scalar_filters:
   - field: equal
     operator: ==
-    value: 1
+    value: 92
     logic: and
   limit: 100

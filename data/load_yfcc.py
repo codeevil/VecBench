@@ -129,7 +129,6 @@ def load_dataset_with_scalars(base_dir, args, as_list=True):
                 rng = np.random.default_rng(42)
                 for i in range(total_n):
                     paper_labels.append({
-                        "equal": int(rng.integers(0, 3)),
                         "topic": int(rng.integers(0, 2)),
                         "aff": int(rng.integers(0, 2)),
                     })
@@ -167,9 +166,10 @@ def load_dataset_with_scalars(base_dir, args, as_list=True):
             if new_n > n_labels:
                 new_n = n_labels
                 idx = idx[:new_n]
-            equal_vals = np.array([paper_labels[i]["equal"] for i in idx], dtype=np.uint16)
             topic_vals = np.array([paper_labels[i]["topic"] for i in idx], dtype=np.uint16)
             aff_vals = np.array([paper_labels[i]["aff"] for i in idx], dtype=np.uint16)
+            rng_eq = np.random.default_rng(42)
+            equal_vals = rng_eq.integers(1, 101, size=new_n, dtype=np.uint16)
             range_vals = np.zeros(new_n, dtype=np.float32)
         else:
             eq_file = f"{dataset_name.lower()}_scalar.bin"

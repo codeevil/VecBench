@@ -19,5 +19,6 @@ pgvector:
       type: btree
 
 search_params:
-  hnsw: [100]
+  # hnsw: [100]
+  hnsw: [100, 100, 150, 200, 300, 400, 600, 800, 1000]
   ivfflat: [50]
