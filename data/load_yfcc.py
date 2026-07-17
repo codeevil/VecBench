@@ -67,6 +67,9 @@ def read_ivecs(filename):
 
 def read_paper_labels(txt_path):
     """Parse PAPER label text file. First line: '<count> 3'. Rest: '<pub> <topic> <affiliation>'."""
+    if not os.path.exists(txt_path):
+        print(f"Warning: {txt_path} not found, returning empty labels")
+        return []
     labels = []
     with open(txt_path, "r", encoding="utf-8") as f:
         lines = f.readlines()
@@ -122,6 +125,14 @@ def load_dataset_with_scalars(base_dir, args, as_list=True):
             total_n = vecs.shape[0]
             smat = None
             paper_labels = read_paper_labels(os.path.join(base_dir, 'paper_label', 'label_paper_base.txt'))
+            if not paper_labels:
+                rng = np.random.default_rng(42)
+                for i in range(total_n):
+                    paper_labels.append({
+                        "equal": int(rng.integers(0, 3)),
+                        "topic": int(rng.integers(0, 2)),
+                        "aff": int(rng.integers(0, 2)),
+                    })
             n_labels = min(len(paper_labels), total_n)
             paper_labels = paper_labels[:n_labels]
         else:

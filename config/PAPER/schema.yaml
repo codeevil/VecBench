@@ -1,5 +1,6 @@
 pgvector:
-  table_name: my_paper
+  schema: paper
+  table_name: my_table
   columns:
     - name: id
       type: INT

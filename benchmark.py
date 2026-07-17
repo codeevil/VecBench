@@ -260,6 +260,9 @@ def main(args):
         # Set correct table_name from schema (create_table normally does this, but test skips it)
         table_schema = schema_config.get(args.database, {})
         schema_table_name = table_schema.get("table_name", "my_table")
+        schema_name = table_schema.get("schema")
+        if schema_name and not args.table_name:
+            schema_table_name = f"{schema_name}.{schema_table_name}"
         db.table_name = args.table_name if args.table_name else schema_table_name
         effective_table_name = db.table_name
 

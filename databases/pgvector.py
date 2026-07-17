@@ -28,6 +28,12 @@ class PGVector(BaseVD):
         if not table_schema:
             raise ValueError(f"Table {self.table_name} not found in schema.")
 
+        pg_schema = table_schema.get("schema")
+        if pg_schema:
+            self.cursor.execute(f"CREATE SCHEMA IF NOT EXISTS {pg_schema};")
+            self.connection.commit()
+            self.table_name = f"{pg_schema}.{self.table_name}"
+
         fields_sql = []
         for field in table_schema.get('columns', []):
             field_name = field.get("name")
